@@ -1,4 +1,4 @@
-AnnotationBreakpoint 0.1.0 is distributed under the MIT license in LICENSE.
+AnnotationBreakpoint is distributed under the MIT license in LICENSE and LICENSE.md.
 
 The release imports installed R packages through their public namespaces:
 edgeR 4.6.3 (GPL >= 2), Matrix 1.7.4 (GPL >= 2), digest 0.6.37

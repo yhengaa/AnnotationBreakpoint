@@ -59,7 +59,7 @@ Rscript --vanilla exec/annotation-breakpoint \
 The example should report `status=exact_minimum`,
 `best_verified_cost=1`, `exact_minimum_cost=1`, and
 `verification_ok=TRUE`. The original strict claim holds; one permitted label
-change crosses onto the closed overturn side. Every cheaper feasible assignment
+change crosses onto the inclusive overturn side. Every cheaper feasible assignment
 has therefore been ruled out for this exact problem.
 
 Layer A uses only the registered feature universe. For each focal-population
@@ -312,12 +312,12 @@ Every method uses Hamming distance from the original assignment, so a reversal
 can lower current cost. Practical caps include the original fit in
 `max_fits`. Duplicate proposals and fresh full fits are recorded separately.
 
-## 7. Inspect the accepted public examples without refitting
+## 7. Inspect the saved public examples without refitting
 
-The accepted saved comparator artifacts contain two public `proxy_prefix`
+The saved comparator artifacts contain two public `proxy_prefix`
 witnesses for the COMBAT CD4.TCM expression contrast COVID_CRIT versus
 COVID_SEV, with 16 donors (8 per group), CD4.TCM/CD4.NAIVE alternatives, and
-`K=8,898`. They use the original global budget 445, frozen 5% per-donor caps,
+`K=8,898`. They use the original global limit 445, 5% per-donor limits,
 and effect threshold 0.5:
 
 | Gene | Original beta | Replayed beta | Cost |
@@ -332,13 +332,14 @@ awk -F '\t' 'NR == 1 || (($1 == "REAL_FAM118A" || $1 == "REAL_PDXK") && $3 == "B
   reports/DECISIVE-COMPARATOR-001/results_13x3.tsv
 ```
 
-The prefix-level effects are in `method_b_prefixes.tsv`, and the independent
-replays are in the owner receipts named in the repository README. These costs
-are verified upper bounds, not exact minima. Crossing 0.5 concerns the fitted
+The prefix-level effects are in `method_b_prefixes.tsv`; the complete rows and
+saved-table reconciliation are in `results_13x3.tsv` and
+`accepted_table_review.json` in the same report directory. These costs are
+verified upper bounds, not exact minima. Crossing 0.5 concerns the fitted
 expression effect; it is not a significance result, annotation truth, or a
-biological discovery. The accepted project disposition found no demonstrated
-unique solver contribution, retained the negative Hao result, and left the
-scaling and broad public-utility questions inconclusive.
+biological discovery. The comparison did not establish a unique solver
+contribution. The negative Hao result remains negative, and the scaling and
+broad public-utility conclusions remain inconclusive.
 
 ## 8. Replay and compare outputs
 

@@ -1,33 +1,19 @@
-# Evidence included in the GitHub snapshot
+# Evidence included in this repository
 
-This directory tree contains compact, publication-safe copies of accepted
-project evidence. It excludes raw counts, caches, model-result objects, job
-logs, agent/runtime records, private mandate text, and the full local-history
-closeout archive.
+This repository includes compact result notes and tables that support the software examples and document negative or inconclusive findings. Raw counts, caches, model-result objects, job logs, private runtime records, and the full local history archive are not included.
 
-## Decisive comparator
+## Comparator evidence
 
-- [`RESULT_NOTE.md`](../DECISIVE-COMPARATOR-001/RESULT_NOTE.md): accepted
-  concise interpretation and registered DROP decision.
-- [`results_13x3.tsv`](../DECISIVE-COMPARATOR-001/results_13x3.tsv): canonical
-  13-case by three-method result table.
-- [`method_b_prefixes.tsv`](../DECISIVE-COMPARATOR-001/method_b_prefixes.tsv):
-  fitted fixed-prefix results supporting the saved FAM118A and PDXK examples.
-- [`public_b_storage_recovery.tsv`](../DECISIVE-COMPARATOR-001/public_b_storage_recovery.tsv):
-  conservative failed-attempt charge and retry accounting.
-- [`accepted_table_review.json`](../DECISIVE-COMPARATOR-001/accepted_table_review.json):
-  saved-table reconciliation and hashes.
+- [`results_13x3.tsv`](../DECISIVE-COMPARATOR-001/results_13x3.tsv): complete 13-case by three-method result table.
+- [`method_b_prefixes.tsv`](../DECISIVE-COMPARATOR-001/method_b_prefixes.tsv): fixed-prefix fits supporting the FAM118A and PDXK examples.
+- [`public_b_storage_recovery.tsv`](../DECISIVE-COMPARATOR-001/public_b_storage_recovery.tsv): conservative retry and failed-save accounting.
+- [`accepted_table_review.json`](../DECISIVE-COMPARATOR-001/accepted_table_review.json): saved-table reconciliation and hashes.
+- [`RESULT_NOTE.md`](../DECISIVE-COMPARATOR-001/RESULT_NOTE.md): the detailed pre-specified comparator interpretation. Its internal decision terminology is retained as part of the historical record.
 
 ## Earlier evaluation
 
-- [`EVIDENCE_SUMMARY.md`](../FINAL-EVALUATION-001/EVIDENCE_SUMMARY.md): bounded
-  public-safe summary of the frozen scaling and COMBAT evaluation.
-- The adjacent TSV files preserve accepted headline, coverage, eligible-claim,
-  and witness rows.
-- [`NEGATIVE_HAO.md`](../M4-PUBLIC-001/NEGATIVE_HAO.md) and
-  [`status_counts.tsv`](../M4-PUBLIC-001/status_counts.tsv) preserve the
-  negative Hao5P demonstration.
+- [`EVIDENCE_SUMMARY.md`](../FINAL-EVALUATION-001/EVIDENCE_SUMMARY.md): compact summary of the scaling and COMBAT evaluations.
+- Adjacent TSV files preserve headline outcomes, K=192 coverage, eligible public claims, public witnesses, and explicit depth denominators.
+- [`NEGATIVE_HAO.md`](../M4-PUBLIC-001/NEGATIVE_HAO.md) and [`status_counts.tsv`](../M4-PUBLIC-001/status_counts.tsv): the negative Hao5P demonstration and its status table.
 
-All example costs are verified upper bounds unless explicitly labeled exact.
-Threshold crossing concerns a fitted expression effect, not statistical
-significance, true labels, or biological discovery.
+All example costs are verified upper bounds unless explicitly labeled exact. A threshold crossing concerns a fitted expression effect; it does not establish a change in statistical significance, the true labels, or a biological discovery.
