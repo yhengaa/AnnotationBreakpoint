@@ -1,0 +1,49 @@
+schema_version: 1.0.0
+analysis_id: edger-ql-pseudobulk-v1
+backend:
+  package: edgeR
+  version: 4.6.3
+  r_version: 4.5.0
+design:
+  formula: ~ condition
+  control_reference: COVID_SEV
+  case_level: COVID_CRIT
+  coefficient_role: case_vs_control
+  donor_fixed_effect: no
+filter:
+  function: filterByExpr
+  min_count: 10
+  min_total_count: 15
+  large_n: 10
+  min_prop: 0.7
+normalization:
+  function: calcNormFactors
+  method: TMM
+  rebuild_library_sizes: yes
+fit:
+  function: glmQLFit
+  dispersion: ~
+  abundance_trend: yes
+  robust: no
+  legacy: no
+  top_proportion: ~
+  prior_count: 0.125
+test:
+  function: glmQLFTest
+  coefficient: case_vs_control
+  poisson_bound: yes
+endpoint:
+  field: logFC
+  units: log2
+  coefficient_check_tolerance: 1.0e-12
+requirements:
+  min_retained_features: 50
+  min_donors_per_condition: 2
+  require_positive_libraries: yes
+failure_policy:
+  filtered_target: not_assessable
+  rank_failure: not_assessable
+  nonfinite_result: not_assessable
+  warning: record
+nuisance_policy_version: rebuild-all-label-dependent-steps-v1
+cache_policy_version: final-fit-canonical-key-v1

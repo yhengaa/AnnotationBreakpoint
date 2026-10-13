@@ -15,6 +15,8 @@
   rendering.
 - Adds per-function help, a buildable vignette, focused continuous integration,
   and package citation metadata.
+- Adds sparse `counts.rds` input, JSON-encoded named sample/donor caps, and a
+  standalone raw-COMBAT reconstruction utility with frozen selection metadata.
 - Narrows the installed package to the supported analysis, search, replay, and
   reporting components. Historical evaluation evidence remains unchanged in
   the source repository.

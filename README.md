@@ -6,7 +6,7 @@ replay-verified witnesses, exact minima, finite-domain stability, and unresolved
 
 ## Install
 
-Install the 0.3.0 source release with R 4.5 or later:
+Install the 0.3.0 source release with R 4.5.x:
 
 ```sh
 Rscript -e 'install.packages(c("BiocManager", "digest", "jsonlite", "yaml")); BiocManager::install(version="3.21"); BiocManager::install("edgeR")'
@@ -54,9 +54,10 @@ enumeration with `--method exact`; it supports at most 12 ambiguous cells and
 
 ## Inputs and outputs
 
-An input directory contains `counts.tsv`, `cells.tsv`, `specimens.tsv`,
+An input directory contains `counts.tsv` (or sparse `counts.rds`), `cells.tsv`, `specimens.tsv`,
 `allowed_labels.tsv`, `claim.tsv`, and `constraints.tsv`. See the [input
-reference](man/validate_inputs.Rd) and [workflow vignette](vignettes/annotation-breakpoint.Rmd).
+reference](man/validate_inputs.Rd), [workflow vignette](vignettes/annotation-breakpoint.Rmd),
+and [COMBAT reconstruction guide](inst/doc/COMBAT_REPRODUCTION.md).
 
 The CLI writes JSON and TSV records plus `report.md`, including hashes, runtime
 identity, fit accounting, changed cells, donor pseudobulks, and replay outcome.

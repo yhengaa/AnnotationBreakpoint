@@ -5,6 +5,7 @@
   if (!is.numeric(prefix_sizes) || !length(prefix_sizes) ||
       anyNA(prefix_sizes) || any(!is.finite(prefix_sizes)) ||
       any(prefix_sizes < 1) || any(prefix_sizes != floor(prefix_sizes)) ||
+      any(prefix_sizes > .Machine$integer.max) ||
       anyDuplicated(prefix_sizes) || is.unsorted(prefix_sizes, strictly = TRUE)) {
     stop(
       "prefix_sizes must be a strictly increasing list of unique positive integers",

@@ -1,0 +1,27 @@
+{
+  "title": "AnnotationBreakpoint: cell-label reassignment sensitivity for registered expression claims",
+  "description": "R software for exact reference enumeration and fixed proxy-ranked prefix searches with independent witness replay.",
+  "creators": [
+    {
+      "name": "Heng, Youshan",
+      "orcid": "0000-0002-2758-171X"
+    }
+  ],
+  "version": "0.3.0",
+  "upload_type": "software",
+  "license": "MIT",
+  "access_right": "open",
+  "related_identifiers": [
+    {
+      "identifier": "https://github.com/yhengaa/AnnotationBreakpoint",
+      "relation": "isSupplementTo",
+      "resource_type": "software"
+    }
+  ],
+  "keywords": [
+    "single-cell RNA-seq",
+    "sensitivity analysis",
+    "cell annotation",
+    "edgeR"
+  ]
+}

@@ -5,6 +5,7 @@
 ^\.Rproj\.user$
 ^\.Rhistory$
 ^\.RData$
+^\.zenodo\.json$
 ^reports$
 ^ab-output$
 ^SHA256SUMS$

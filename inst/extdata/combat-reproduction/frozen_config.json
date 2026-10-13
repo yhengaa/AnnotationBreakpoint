@@ -1,0 +1,100 @@
+{
+  "schema_version": "1.0.0",
+  "registration_id": "COMBAT-PUBLIC-EVALUATION-RECONSTRUCTION-v1",
+  "source": {
+    "record": "Zenodo 6120249",
+    "doi": "10.5281/zenodo.6120249",
+    "file": "COMBAT-CITESeq-DATA.h5ad",
+    "url": "https://zenodo.org/api/records/6120249/files/COMBAT-CITESeq-DATA.h5ad/content",
+    "bytes": 6409089483,
+    "checksum_algorithm": "md5",
+    "checksum": "87c6b1a733ea1adc37c808d9a357de74",
+    "license": "CC-BY-4.0"
+  },
+  "dimensions": {
+    "cells": 28121,
+    "features": 20615,
+    "donors": 16,
+    "ambiguities": 8898,
+    "nonzero_counts": 31956020
+  },
+  "feature_axis": {
+    "ids": "/var/_index",
+    "types": "/var/feature_types",
+    "rna_type": "Gene Expression",
+    "expected_rna_features": 20615,
+    "raw_counts": "/layers/raw"
+  },
+  "ambiguity": {
+    "matrix": "/X",
+    "marker_naive": "AB_CD45RA",
+    "marker_memory": "AB_CD45RO",
+    "boundary": -0.321382261043606,
+    "scale": 1.73725582151018,
+    "near_boundary_multiplier": 0.5,
+    "focal_label": "CD4.TCM",
+    "alternative_label": "CD4.NAIVE",
+    "evidence_source_original": "COMBAT_multimodal_source_annotation",
+    "evidence_version_original": "Zenodo-6120249-COMBAT-CITESeq-DATA",
+    "evidence_source_alternative": "COMBAT_same_cell_ADT_dependent_admissibility",
+    "evidence_version_alternative": "combat-public-ambiguity-v1"
+  },
+  "claim": {
+    "case_condition": "COVID_CRIT",
+    "control_condition": "COVID_SEV",
+    "focal_label": "CD4.TCM",
+    "alternative_label": "CD4.NAIVE",
+    "q": 1,
+    "delta": 0.5,
+    "tolerance": 1e-12,
+    "estimator_id": "edger-ql-pseudobulk-v1",
+    "genes": {
+      "FAM118A": "C04_FAM118A_devdir",
+      "PDXK": "C15_PDXK_devdir"
+    }
+  },
+  "constraints": {
+    "max_changes_global": 445,
+    "min_donors_per_condition": 8,
+    "min_cells_CD4.TCM": 20,
+    "min_cells_CD4.NAIVE": 20,
+    "min_library_CD4.TCM": 1,
+    "min_library_CD4.NAIVE": 1,
+    "max_changes_per_sample": {
+      "S00024-Ja003E-PBCa": 18,
+      "S00028-Ja001E-PBCa": 54,
+      "S00034-Ja005E-PBCa": 42,
+      "S00040-Ja005E-PBCa": 25,
+      "S00043-Ja005E-PBCa": 24,
+      "S00050-Ja001E-PBCa": 30,
+      "S00052-Ja005E-PBCa": 59,
+      "S00053-Ja003E-PBCa": 28,
+      "S00057-Ja003E-PBCa": 29,
+      "S00064-Ja005E-PBCa": 33,
+      "S00065-Ja003E-PBCa": 24,
+      "S00069-Ja005E-PBCa": 16,
+      "S00077-Ja005E-PBCa": 25,
+      "S00094-Ja005E-PBCa": 16,
+      "S00099-Ja005E-PBCa": 7,
+      "S00106-Ja003E-PBCa": 22
+    },
+    "max_changes_per_donor": {
+      "S00024": 18,
+      "S00028": 54,
+      "S00034": 42,
+      "S00040": 25,
+      "S00043": 24,
+      "S00050": 30,
+      "S00052": 59,
+      "S00053": 28,
+      "S00057": 29,
+      "S00064": 33,
+      "S00065": 24,
+      "S00069": 16,
+      "S00077": 25,
+      "S00094": 16,
+      "S00099": 7,
+      "S00106": 22
+    }
+  }
+}
