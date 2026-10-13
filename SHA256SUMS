@@ -1,4 +1,5 @@
-d1f40a301f286e500a36a0c56fbe7698d72215f852a1aa5a610ff5c8cdb419d6  ./.Rbuildignore
+eb3e4a4d0a38a68045c4d2a1da4d5c13d4d1440e2822d2c95811dbdd982c0d25  ./.Rbuildignore
+060f99ef6c46b4575f5362eb325abdd09785293652d95b91b7fd56b614870b8d  ./.github/ISSUE_TEMPLATE/usage-feedback.yml
 2d16830f8ac432ddddefbcca3f4783ed8faccfe86192f4c67cc96291c85d1217  ./.github/workflows/R-CMD-check.yaml
 0071e5b09566d247dc7a9b4a678d1aebaffecc2a3b88da5a83178dc01e1e6b7f  ./.gitignore
 e84baf369913ab39f8646d62c131837143967add4bafaed6294383f1b7a6060b  ./.zenodo.json
@@ -21,7 +22,10 @@ ac069c8b9c84923b1f3673dbfe4be6eb07ff6344ae1bcd003e6b6555eb83e73a  ./R/render_rep
 ba4f33ba95c73e38a3530805a052e371b32864783e2441881c855fbc2c8330ef  ./R/utils.R
 000434d5f62264643ebdad25abaee60a11a2a96a9fd15f060e5afa33c7ad6368  ./R/validate_inputs.R
 22c37574484463845d76eae2dc2d791e5598f57ed207ab3e4ffcbd15b0dbdeb2  ./R/verify_witness.R
-1af1cc42f48e8100caf5efa4226959a871785ad8371bde424a08f8dcf247ec71  ./README.md
+7cc87d05eb1cbba6f5eb8a2e1bf17b20a514a41f54b8b0d4b5e84f524fbbacd8  ./README.md
+39ad13408317d26e22ad495dc6f1144773ee8dd8aab035b5d894f9d15361cfdd  ./docs/FAM118A_WALKTHROUGH.md
+5fe549c6a47f83d0c63fa9a5bb0e1885edca6a9c613e2a3fbd372dbadb734165  ./docs/assets/fam118a-sensitivity.png
+34b41a4397ed3591fcb0ef58311f8fa1476fe008731c87b1ba3d787b8b4ff737  ./docs/assets/fam118a-sensitivity.svg
 c45d34fb1ea481b0b043add3c028c2c2a971813b5099cd91403170741f49988c  ./exec/annotation-breakpoint
 2cd5651cc3b16ddb89a1983358b01bd5e5a7061bcb4bd39fe90e4f7fcf4cfd0b  ./inst/CITATION
 56dfe1fb207db429f1e2ee5f727b4e2c722c877202ee11fcaf3394b7ea5cb963  ./inst/NOTICE

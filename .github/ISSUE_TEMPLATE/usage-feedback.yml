@@ -1,0 +1,54 @@
+name: Usage feedback
+description: Share what you tried, what the result showed, and what would make Annotation Breakpoint more useful.
+title: "[Usage] "
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Thanks for trying Annotation Breakpoint.
+  - type: dropdown
+    id: installation
+    attributes:
+      label: Installation
+      options:
+        - Release 0.3.0
+        - Repository source
+        - Not installed yet
+    validations:
+      required: true
+  - type: input
+    id: runtime
+    attributes:
+      label: Runtime
+      description: R and edgeR versions, if available.
+      placeholder: "R 4.5.x; edgeR 4.6.3"
+  - type: dropdown
+    id: input
+    attributes:
+      label: Input used
+      options:
+        - Bundled tiny example
+        - COMBAT reconstruction
+        - My own input
+        - Documentation review only
+    validations:
+      required: true
+  - type: textarea
+    id: goal
+    attributes:
+      label: Analysis goal
+      description: What expression claim or workflow were you trying to assess?
+    validations:
+      required: true
+  - type: textarea
+    id: result
+    attributes:
+      label: Result
+      description: What status or output did Annotation Breakpoint return?
+  - type: textarea
+    id: unmet
+    attributes:
+      label: What would help next?
+      description: Describe missing guidance, confusing output, or a practical need.
+    validations:
+      required: true

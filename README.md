@@ -1,8 +1,21 @@
 # Annotation Breakpoint
 
-Annotation Breakpoint measures how sensitive a predeclared donor-level
-expression-effect claim is to permitted cell-label changes. It distinguishes
-replay-verified witnesses, exact minima, finite-domain stability, and unresolved searches.
+**Test whether an expression claim depends on permitted cell-label changes.**
+
+Annotation Breakpoint refits a predeclared donor-level edgeR pseudobulk model
+after controlled single-cell annotation reassignments and independently replays
+any witness it finds.
+
+[Release 0.3.0](https://github.com/yhengaa/AnnotationBreakpoint/releases/tag/v0.3.0)
+· [Zenodo](https://doi.org/10.5281/zenodo.23353292)
+· [Workflow tutorial](vignettes/annotation-breakpoint.Rmd)
+· [FAM118A walkthrough](docs/FAM118A_WALKTHROUGH.md)
+
+![FAM118A log2 effect decreased from 0.811 to 0.473 after 64 permitted label changes, crossing the registered threshold of 0.5.](docs/assets/fam118a-sensitivity.png)
+
+In the saved FAM118A example, 64 permitted label changes moved the fitted
+COVID_CRIT versus COVID_SEV effect from 0.811 to 0.473. The replayed result is
+a verified upper bound on sensitivity cost.
 
 ## Install
 
@@ -24,7 +37,7 @@ Rscript --vanilla "$AB_CLI" --allow-version-mismatch [other options]
 
 ## Quick start
 
-Run the installed Layer-A fixture with the default `proxy_prefix` search:
+Run the bundled toy example with the default `proxy_prefix` search:
 
 ```sh
 AB_CLI="$(Rscript --vanilla -e 'cat(system.file("exec", "annotation-breakpoint", package="AnnotationBreakpoint"))')"
@@ -35,6 +48,9 @@ Rscript --vanilla "$AB_CLI" \
   --layer-a \
   --output-dir ab-output/quickstart
 ```
+
+This is a portable workflow demonstration; the public COMBAT example uses the
+edgeR backend described in the [FAM118A walkthrough](docs/FAM118A_WALKTHROUGH.md).
 
 ## Method
 
