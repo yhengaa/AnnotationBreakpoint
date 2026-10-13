@@ -3,7 +3,21 @@ name: R package checks
 on:
   push:
     branches: [main]
+    paths-ignore:
+      - "python/**"
+      - "docs/PYTHON.md"
+      - "README.md"
+      - ".github/workflows/python.yml"
+      - "SHA256SUMS"
+      - ".gitignore"
   pull_request:
+    paths-ignore:
+      - "python/**"
+      - "docs/PYTHON.md"
+      - "README.md"
+      - ".github/workflows/python.yml"
+      - "SHA256SUMS"
+      - ".gitignore"
   workflow_dispatch:
 
 permissions:

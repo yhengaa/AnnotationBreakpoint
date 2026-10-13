@@ -4,3 +4,8 @@
 *.Rcheck/
 *.tar.gz
 ab-output/
+python/.venv/
+python/build/
+python/dist/
+python/src/*.egg-info/
+python/**/__pycache__/

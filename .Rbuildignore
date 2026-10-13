@@ -9,5 +9,6 @@
 ^CITATION\.cff$
 ^docs$
 ^reports$
+^python$
 ^ab-output$
 ^SHA256SUMS$
