@@ -1,0 +1,4 @@
+claim_id	feature_id	q	original_beta	original_signed_margin	fixed_comparators_complete	fixed_comparator_flag	greedy_witnesses	best_greedy_cost	random_witnesses	best_random_cost	classification
+C04_FAM118A_devdir	FAM118A	1	0.810675256167912	0.310675256167912	TRUE	FALSE	0	NA	0	NA	no_greedy_witness_at_registered_caps
+C14_IL18R1_devdir	IL18R1	1	0.500445209221746	0.000445209221745735	TRUE	FALSE	2	1	2	37	explanation_or_compression
+C15_PDXK_devdir	PDXK	1	0.727464176839304	0.227464176839304	TRUE	FALSE	0	NA	0	NA	no_greedy_witness_at_registered_caps

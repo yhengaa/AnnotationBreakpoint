@@ -1,0 +1,16 @@
+# Decisive three-method comparator
+
+**Registered outcome: DROP the methods claim.** The first-drop rule had precedence: 0 C-only cases (drop at <=1) and 0 cases with an operational C-versus-B cost gain of at least 2.
+
+This was the fixed 13-case development test requested by the user: three existing COMBAT claims and ten eligibility-screened synthetic cases, each evaluated by literal all-in/all-out extremes (A), the frozen observed-label proxy prefixes (B), and unchanged canonical greedy search (C). The reassignment domains were unchanged: public global limit 445 with the registered per-donor limits, and synthetic K=192. Here, overturn means crossing the fixed 0.5 expression-effect threshold; it does not mean a change in statistical significance or establish true labels. Every reported witness was replayed independently.
+
+Across all 13 cases, threshold-crossing detections were A 9/13; B 13/13; C 11/13; valid in-domain witnesses were A 9/13; B 13/13; C 11/13. Public detections were A 0/3; B 3/3; C 1/3, and synthetic detections were A 9/10; B 10/10; C 10/10. 11 finite B/C pairs; median B-C cost 0; range 0 to 1.
+
+Method A's public assignments changed 5,187 cells for all-in and 3,711 for all-out, violating the unchanged global and per-donor caps. Their raw effects remain in `method_a_extremes.tsv`; a threshold crossing there would count only as a registered stress detection, never as a valid witness or finite best cost. Synthetic A extremes were inside their registered domain. Method B's 192 singleton fits were diagnostic only: they contribute to its fit count and rank-correlation estimate but cannot create a B recovery. A valid completed/capped no-hit is treated as +Inf only for the operational stop rule, not as a lower bound on the true optimum.
+
+Authoritative fit totals for A/B/C were 39/2601/5384; replay-fit totals were 34/26/24. Among detected cases, median seconds to first full-fit nomination were A 0.48; B 0.61; C 1.85; median seconds until independent replay verification were A 0.77; B 0.88; C 14.92. These are retained-attempt counts. Canonical replay waited until its frozen search returned. The 19 initial loader failures occurred before scientific method or replay fits and were retried only after the approved loader-only amendment. Public B FAM118A and PDXK later failed only while saving; their table cells and `public_b_storage_recovery.tsv` show retry-local measurements and the conservative cumulative fit charge. Original first-witness timing for those failed attempts is unavailable.
+## Interpretation limits
+
+The ten synthetic cases were selected by the frozen eligibility screen, so this is development evidence rather than a held-out performance estimate. The three public claims reuse the accepted COMBAT development data and do not establish biological utility. The proxy is the existing finite donor-logCPM change score, not an AMIP or formal first-order edgeR influence approximation. This result leaves all accepted earlier reports, including the negative Hao result, unchanged.
+
+Per the registered first-drop precedence, this deliverable stops at the 39-row table and this result note. For software/application scope, a drop result ends further search-algorithm work under this claim.

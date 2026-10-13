@@ -1,0 +1,4 @@
+method	all_registered_runs	originally_met_runs	median_fitted_depth_all_runs	median_fitted_depth_originally_met	median_selected_depth_originally_met	per_run_selected_exceeds_fitted	selected_depth_definition
+greedy	24	18	2	2.5	2.5	0	maximum accepted search-path depth
+random	24	18	3	3	0	0	no accepted local-search path; zero denotes no selected continuation
+pair	24	18	2	2	2	0	maximum accepted search-path depth

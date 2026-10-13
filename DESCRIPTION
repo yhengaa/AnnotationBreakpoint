@@ -1,0 +1,18 @@
+Package: AnnotationBreakpoint
+Title: Annotation Reassignment Sensitivity Reference and Search
+Version: 0.2.0
+Authors@R: person("Annotation Breakpoint", "Automation", email = "annotation-breakpoint@local.invalid", role = c("aut", "cre"))
+Description: Implements exact reference enumeration and practical fixed-prefix
+    search for constrained cell-label reassignment sensitivity of a registered
+    donor-level expression effect. The package distinguishes replay-verified
+    upper bounds, exact minima, exhaustive stability, and unresolved no-hits.
+License: MIT + file LICENSE
+Encoding: UTF-8
+Depends: R (>= 4.5.0)
+Imports: digest, edgeR, jsonlite, Matrix, methods, stats, utils, yaml
+Suggests: rhdf5, testthat (>= 3.2.0)
+Config/testthat/edition: 3
+NeedsCompilation: no
+Packaged: 2026-10-13 02:58:44 UTC; poggar
+Author: Annotation Breakpoint Automation [aut, cre]
+Maintainer: Annotation Breakpoint Automation <annotation-breakpoint@local.invalid>

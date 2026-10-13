@@ -1,0 +1,8 @@
+^\.git$
+^\.gitignore$
+^\.Rbuildignore$
+^\.Rproj\.user$
+^\.Rhistory$
+^\.RData$
+^reports$
+^ab-output$

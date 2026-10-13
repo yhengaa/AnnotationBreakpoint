@@ -1,0 +1,12 @@
+{
+  "checked_package_tar_sha256": "733e005289dc9930b881f07fb1ebbb1c513424f746b0feda09024a5f7e33ce07",
+  "byte_identical_package_files": 44,
+  "publication_modified_package_files": [
+    "README.md"
+  ],
+  "publication_omitted_private_files": [
+    "mandates/DECISIVE_COMPARATOR_USER_DIRECTIVE_2026-10-12.md",
+    "mandates/PRIOR_ART_COMPARATOR_MANDATE_2026-09-10.md"
+  ],
+  "executable_source_mismatches": 0
+}

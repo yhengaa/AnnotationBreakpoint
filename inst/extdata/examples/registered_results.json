@@ -1,0 +1,27 @@
+{
+  "schema_version": "1.0.0",
+  "source_evidence": {
+    "exact_toy": "reports/M1-EXACT-001/fragile",
+    "edger_witness": "reports/M2-SEARCH-001/witness_inbound/exact"
+  },
+  "cases": {
+    "exact_toy": {
+      "status": "exact_minimum",
+      "exact_minimum_cost": 1,
+      "original_beta": 1.280107919192734,
+      "witness_beta": 0.785457863521341,
+      "witness_id": "c81eca1d393b8f1a5fcca24561a16d0063121495594d17e394d20465a2981a14",
+      "input_hash": "ede2fff07e24b7dddfaf7bc42473361356ac78c7e0e3a22bde05f7691acef89c",
+      "specification_hash": "5603040b624cb5c7b9591e8f70c20c5ea41a8b1e7cc0c70d9fb24e05c6a64120"
+    },
+    "edger_witness": {
+      "status": "exact_minimum",
+      "exact_minimum_cost": 1,
+      "original_beta": 1.02502227383395,
+      "witness_beta": 0.725737175622861,
+      "witness_id": "023ddf64887dae44880ea993fd822dfed98f8fff9f322cba3b89582089ac4dfe",
+      "input_hash": "dbed163e548036c4407035fb2f447eff723481e6033e4f0c54a449eecbbc721c",
+      "specification_hash": "2724d60a31cadc106fc315abb346f2659e6b700155f1e3e9777508322704b0a9"
+    }
+  }
+}

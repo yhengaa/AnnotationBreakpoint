@@ -1,0 +1,2 @@
+min_cells_A	min_cells_B	min_library_A	min_library_B	max_changes_global	max_changes_per_sample	max_changes_per_donor	min_donors_per_condition
+1	1	1	1	2	2	2	4

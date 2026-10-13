@@ -1,0 +1,203 @@
+#!/usr/bin/env Rscript
+
+args <- commandArgs(trailingOnly = TRUE)
+options <- list(
+  fixture_dir = NULL,
+  input_dir = NULL,
+  analysis_spec = NULL,
+  layer_a = FALSE,
+  output_dir = NULL,
+  method = "proxy_prefix",
+  max_evaluations = Inf,
+  max_fits = 1024,
+  max_proposals = Inf,
+  max_seconds = Inf,
+  seed = 82901L,
+  direction = "all"
+)
+
+usage <- paste(
+  "usage: annotation-breakpoint",
+  "(--fixture-dir PATH | --input-dir PATH (--analysis-spec YAML | --layer-a))",
+  "--output-dir PATH [--method proxy_prefix|exact|random|greedy|pair; default proxy_prefix]",
+  "[--max-evaluations N] [--max-fits N] [--max-proposals N]",
+  "[--max-seconds N] [--seed N] [--direction all|outgoing_only]"
+)
+
+take_value <- function(flag, remaining) {
+  if (length(remaining) < 2L) stop(flag, " requires a value", call. = FALSE)
+  remaining[[2L]]
+}
+
+while (length(args)) {
+  key <- args[[1L]]
+  consumed <- 2L
+  if (key == "--help") {
+    cat(usage, "\n")
+    quit(save = "no", status = 0L)
+  } else if (key == "--fixture-dir") {
+    options$fixture_dir <- take_value(key, args)
+  } else if (key == "--input-dir") {
+    options$input_dir <- take_value(key, args)
+  } else if (key == "--analysis-spec") {
+    options$analysis_spec <- take_value(key, args)
+  } else if (key == "--layer-a") {
+    options$layer_a <- TRUE
+    consumed <- 1L
+  } else if (key == "--output-dir") {
+    options$output_dir <- take_value(key, args)
+  } else if (key == "--method") {
+    options$method <- take_value(key, args)
+  } else if (key == "--max-evaluations") {
+    options$max_evaluations <- suppressWarnings(as.numeric(take_value(key, args)))
+  } else if (key == "--max-fits") {
+    options$max_fits <- suppressWarnings(as.numeric(take_value(key, args)))
+  } else if (key == "--max-proposals") {
+    options$max_proposals <- suppressWarnings(as.numeric(take_value(key, args)))
+  } else if (key == "--max-seconds") {
+    options$max_seconds <- suppressWarnings(as.numeric(take_value(key, args)))
+  } else if (key == "--seed") {
+    options$seed <- suppressWarnings(as.integer(take_value(key, args)))
+  } else if (key == "--direction") {
+    options$direction <- take_value(key, args)
+  } else {
+    stop(usage, call. = FALSE)
+  }
+  args <- args[-seq_len(consumed)]
+}
+
+provided_inputs <- !vapply(
+  options[c("fixture_dir", "input_dir")], is.null, logical(1L)
+)
+if (is.null(options$output_dir) || sum(provided_inputs) != 1L) {
+  stop(usage, call. = FALSE)
+}
+if (!options$method %in% c("proxy_prefix", "exact", "random", "greedy", "pair")) {
+  stop("--method must be proxy_prefix, exact, random, greedy, or pair", call. = FALSE)
+}
+if (!options$direction %in% c("all", "outgoing_only")) {
+  stop("--direction must be all or outgoing_only", call. = FALSE)
+}
+if (identical(options$method, "exact") &&
+    identical(options$direction, "outgoing_only")) {
+  stop("--direction outgoing_only is unavailable with --method exact", call. = FALSE)
+}
+if (!is.null(options$input_dir) &&
+    identical(is.null(options$analysis_spec), !isTRUE(options$layer_a))) {
+  stop("--input-dir requires exactly one of --analysis-spec or --layer-a",
+       call. = FALSE)
+}
+if (!is.null(options$fixture_dir) &&
+    (!is.null(options$analysis_spec) || isTRUE(options$layer_a))) {
+  stop("fixture mode does not accept --analysis-spec or --layer-a", call. = FALSE)
+}
+
+suppressPackageStartupMessages(library(AnnotationBreakpoint))
+if (!is.null(options$fixture_dir)) {
+  reader <- getFromNamespace("read_fixture_directory", "AnnotationBreakpoint")
+  inputs <- reader(options$fixture_dir)
+} else {
+  analysis_spec <- if (is.null(options$analysis_spec)) {
+    NULL
+  } else {
+    yaml::read_yaml(options$analysis_spec)
+  }
+  reader <- getFromNamespace("read_input_directory", "AnnotationBreakpoint")
+  inputs <- reader(options$input_dir, analysis_spec = analysis_spec)
+}
+validation <- do.call(
+  validate_inputs,
+  inputs[intersect(
+    c(
+      "counts", "cells", "specimens", "allowed_labels", "claim",
+      "constraints", "analysis_spec"
+    ),
+    names(inputs)
+  )]
+)
+if (!isTRUE(validation$ok)) {
+  message("invalid_input: ", paste(validation$errors, collapse = "; "))
+  quit(save = "no", status = 2L)
+}
+
+result <- if (identical(options$method, "exact")) {
+  enumerate_breakpoint(
+    validation,
+    max_evaluations = options$max_evaluations
+  )
+} else {
+  search_breakpoint(
+    validation,
+    method = options$method,
+    max_fits = options$max_fits,
+    seed = options$seed,
+    max_proposals = options$max_proposals,
+    max_seconds = options$max_seconds,
+    direction = options$direction
+  )
+}
+if (identical(result$status, "invalid_input")) {
+  message("invalid_input: ", paste(result$errors, collapse = "; "))
+  quit(save = "no", status = 2L)
+}
+
+verification <- result$independent_verification
+embedded_identity_ok <- inherits(verification, "ab_verification") &&
+  isTRUE(verification$ok) &&
+  identical(
+    verification$result_identity,
+    getFromNamespace(".ab_result_identity", "AnnotationBreakpoint")(result)
+  ) &&
+  identical(verification$input_hashes, result$input_hashes)
+if (!isTRUE(embedded_identity_ok)) {
+  verification <- verify_witness(validation, result)
+}
+if (!isTRUE(verification$ok)) {
+  message("verification_failed: ", paste(verification$errors, collapse = "; "))
+  quit(save = "no", status = 3L)
+}
+rendered <- render_report(
+  result,
+  verification,
+  options$output_dir,
+  run_metadata = list(
+    mode = if (is.null(options$fixture_dir)) "normal_file_input" else "fixture",
+    input_dir = normalizePath(
+      if (is.null(options$fixture_dir)) options$input_dir else options$fixture_dir,
+      mustWork = TRUE
+    ),
+    analysis_spec = if (is.null(options$analysis_spec)) {
+      NULL
+    } else {
+      normalizePath(options$analysis_spec, mustWork = TRUE)
+    },
+    analysis_target = if (isTRUE(options$layer_a)) "layer_a" else
+      if (is.null(options$analysis_spec)) "fixture_layer_a" else "authoritative_backend",
+    method = options$method,
+    max_evaluations = if (is.infinite(options$max_evaluations)) {
+      "Inf"
+    } else {
+      options$max_evaluations
+    },
+    max_fits = options$max_fits,
+    max_proposals = options$max_proposals,
+    max_seconds = options$max_seconds,
+    seed = options$seed,
+    direction = options$direction,
+    package_version = as.character(utils::packageVersion("AnnotationBreakpoint"))
+  )
+)
+
+scalar_or_na <- function(value) {
+  if (is.null(value) || !length(value) || is.na(value[[1L]])) "NA" else value[[1L]]
+}
+cat(
+  "status=", result$status,
+  " best_verified_cost=", scalar_or_na(result$best_verified_cost),
+  " exact_minimum_cost=", scalar_or_na(result$exact_minimum_cost),
+  " verification_ok=", verification$ok,
+  " method=", options$method,
+  " output_dir=", rendered$output_dir,
+  "\n",
+  sep = ""
+)

@@ -1,0 +1,7 @@
+question	result	formal_interpretation
+Scaling execution	984/984 tasks; all saved verifications passed; zero scientific failures	technically complete
+Scaling small-domain accuracy	Greedy/128 matched exact cost in 20/20 K6/K12 repeated-domain observations	registered rule met
+Scaling K192 primary	Greedy/128 found 2/10 replayed witnesses; required denominator was 12	inconclusive
+Scaling method choice	Keep greedy for this fixed mixture; pair-minus-greedy hit difference -0.0556	bounded default retained
+Public execution	96/96 searches; four replayed witness observations, all for IL18R1	technically complete
+Public added information	0 strict added-information claims; 1 explanation/compression example	public utility unsupported

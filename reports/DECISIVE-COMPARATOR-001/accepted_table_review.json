@@ -1,0 +1,35 @@
+{
+  "review": "PASS",
+  "rows": 39,
+  "previous_rows_preserved": 33,
+  "new_public_records_matched": 6,
+  "detections": {
+    "A": 9,
+    "B": 13,
+    "C": 11
+  },
+  "c_only_cases": 0,
+  "c_gain_ge2_cases": 0,
+  "finite_BC_gains": [
+    0.0,
+    0.0,
+    0.0,
+    0.0,
+    0.0,
+    0.0,
+    0.0,
+    0.0,
+    1.0,
+    1.0,
+    0.0
+  ],
+  "registered_outcome": "drop_methods_claim",
+  "note_word_count": 480,
+  "html_external_dependencies": [],
+  "sha256": {
+    "REPORT.html": "4bc1cf2a8a9a124f8c3cc9bcec914f0ef9f438ef8042e36b06920f853e6f2d36",
+    "RESULT_NOTE.md": "0e5cbb346015db6bb06dc74ae1e733c56c366fa2afaa663f6893f675fae5a5e4",
+    "results_13x3.tsv": "53e7ef59d19cf13bdbbce4c67a144c424cea38bd70d0e55b3a977907fe02273e",
+    "results_13x3.csv": "762be264d2f2e53712c60cd0d20e7cb30aa533df50bbb016de29502599e9ed24"
+  }
+}

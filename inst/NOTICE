@@ -1,0 +1,12 @@
+AnnotationBreakpoint 0.1.0 is distributed under the MIT license in LICENSE.
+
+The release imports installed R packages through their public namespaces:
+edgeR 4.6.3 (GPL >= 2), Matrix 1.7.4 (GPL >= 2), digest 0.6.37
+(GPL >= 2), jsonlite 2.0.0 (MIT), and yaml 2.3.10 (BSD 3-clause).
+Tests use testthat 3.2.3 (MIT). edgeR uses limma 3.64.3 (GPL >= 2).
+
+No implementation code from the scientific comparator repositories inspected
+during methods review was copied into this package. Those projects remain
+citations and context only. The installed example tables are synthetic project
+fixtures generated for Annotation Breakpoint and are bound to their original
+paths and SHA-256 hashes in inst/extdata/examples/provenance.tsv.

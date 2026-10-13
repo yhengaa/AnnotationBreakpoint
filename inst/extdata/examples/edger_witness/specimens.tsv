@@ -1,0 +1,9 @@
+sample_id	donor_id	condition
+W_C1	W_D_C1	control
+W_C2	W_D_C2	control
+W_C3	W_D_C3	control
+W_C4	W_D_C4	control
+W_K1	W_D_K1	case
+W_K2	W_D_K2	case
+W_K3	W_D_K3	case
+W_K4	W_D_K4	case

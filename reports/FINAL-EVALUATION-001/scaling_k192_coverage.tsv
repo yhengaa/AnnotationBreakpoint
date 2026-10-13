@@ -1,0 +1,7 @@
+tier	max_fits	method	independent_parents	replayed_witnesses	hit_rate	no_hit_unresolved
+primary	128	greedy	10	2	0.2	8
+primary	128	random	10	2	0.2	8
+primary	128	pair	10	2	0.2	8
+additional_coverage	1024	greedy	10	10	1	0
+additional_coverage	1024	random	10	7	0.7	3
+additional_coverage	1024	pair	10	5	0.5	5
