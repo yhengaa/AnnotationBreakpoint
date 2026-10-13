@@ -27,6 +27,17 @@ curl -L -O https://github.com/yhengaa/AnnotationBreakpoint/releases/download/v0.
 R CMD INSTALL AnnotationBreakpoint_0.3.0.tar.gz
 ```
 
+The supported Python interface uses this installed R engine:
+
+```sh
+python -m pip install \
+  "annotation-breakpoint-python @ git+https://github.com/yhengaa/AnnotationBreakpoint.git#subdirectory=python"
+```
+
+Python 3.10+ is supported. The bridge is separately versioned at 0.1.0 and has
+no third-party Python runtime dependencies. See the [Python guide](docs/PYTHON.md)
+for API use, exact search, runtime policy, and explicit executable paths.
+
 Authoritative reproduction uses R 4.5.0 and edgeR 4.6.3; see the [workflow
 vignette](vignettes/annotation-breakpoint.Rmd) and [declared dependencies](DESCRIPTION).
 For a patch difference, request:
@@ -51,6 +62,19 @@ Rscript --vanilla "$AB_CLI" \
 
 This is a portable workflow demonstration; the public COMBAT example uses the
 edgeR backend described in the [FAM118A walkthrough](docs/FAM118A_WALKTHROUGH.md).
+
+The same authoritative workflow is available from Python:
+
+```python
+from annotation_breakpoint import run_annotation_breakpoint
+
+run = run_annotation_breakpoint(
+    input_dir="inputs/FAM118A",
+    analysis_spec="analysis_specs/FAM118A.yaml",
+    output_dir="results/FAM118A",
+)
+print(run.status, run.witness_found)
+```
 
 ## Method
 

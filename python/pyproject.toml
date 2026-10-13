@@ -1,0 +1,39 @@
+[build-system]
+requires = ["setuptools>=77", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "annotation-breakpoint-python"
+version = "0.1.0"
+description = "Python interface to the Annotation Breakpoint R engine"
+readme = "README.md"
+requires-python = ">=3.10"
+license = "MIT"
+license-files = ["LICENSE.md"]
+authors = [
+  { name = "Youshan Heng", email = "youshan@ualberta.ca" }
+]
+keywords = ["single-cell", "pseudobulk", "edgeR", "cell-annotation"]
+classifiers = [
+  "Development Status :: 3 - Alpha",
+  "Programming Language :: Python :: 3",
+  "Programming Language :: Python :: 3.10",
+  "Programming Language :: Python :: 3.11",
+  "Programming Language :: Python :: 3.12",
+]
+
+[project.urls]
+Homepage = "https://github.com/yhengaa/AnnotationBreakpoint"
+Documentation = "https://github.com/yhengaa/AnnotationBreakpoint/blob/main/docs/PYTHON.md"
+
+[project.scripts]
+annotation-breakpoint-py = "annotation_breakpoint.cli:main"
+
+[tool.setuptools]
+package-dir = { "" = "src" }
+
+[tool.setuptools.packages.find]
+where = ["src"]
+
+[tool.setuptools.package-data]
+annotation_breakpoint = ["py.typed"]
