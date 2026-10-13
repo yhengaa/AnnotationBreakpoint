@@ -6,6 +6,7 @@
 ^\.Rhistory$
 ^\.RData$
 ^\.zenodo\.json$
+^CITATION\.cff$
 ^reports$
 ^ab-output$
 ^SHA256SUMS$

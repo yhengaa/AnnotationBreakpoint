@@ -104,4 +104,6 @@ and Broderick (2023)](https://arxiv.org/abs/2312.06159). The `proxy_prefix`
 proposal score is an observed-centered finite-change adaptation, not a reproduction.
 
 Use `citation("AnnotationBreakpoint")` for the package citation.
+The archived 0.3.0 release is available from Zenodo at
+[doi:10.5281/zenodo.23353292](https://doi.org/10.5281/zenodo.23353292).
 AnnotationBreakpoint is distributed under the [MIT License](LICENSE.md).
