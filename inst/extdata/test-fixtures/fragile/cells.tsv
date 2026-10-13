@@ -1,0 +1,11 @@
+cell_id	sample_id	donor_id	condition	original_label
+F_C1_A	S_C1	D_C1	control	A
+F_C1_B	S_C1	D_C1	control	B
+F_C1_in	S_C1	D_C1	control	B
+F_C2_A	S_C2	D_C2	control	A
+F_C2_B	S_C2	D_C2	control	B
+F_K1_A	S_K1	D_K1	case	A
+F_K1_B	S_K1	D_K1	case	B
+F_K1_in	S_K1	D_K1	case	B
+F_K2_A	S_K2	D_K2	case	A
+F_K2_B	S_K2	D_K2	case	B

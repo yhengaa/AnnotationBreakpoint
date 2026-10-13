@@ -1,0 +1,5 @@
+rank	changes	cost	feasible	beta	overturn	expected_status	expected_best_verified_cost	expected_exact_minimum_cost
+0	original	0	true	1.2801079191927336	false	exact_minimum	1	1
+1	F_C1_in=A	1	true	1.77475797486413	false	exact_minimum	1	1
+2	F_K1_in=A	1	true	0.7854578635213407	true	exact_minimum	1	1
+3	F_C1_in=A;F_K1_in=A	2	true	1.2801079191927371	false	exact_minimum	1	1

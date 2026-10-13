@@ -1,0 +1,2 @@
+focal_gene	focal_label	case_condition	control_condition	q	delta	tolerance	feature_universe
+G_target	A	case	control	1	1.0	1e-12	G_target|G_ref1|G_ref2

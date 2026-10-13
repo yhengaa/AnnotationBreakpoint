@@ -219,6 +219,8 @@
 #'   currently requires `1` so no completed full fit is omitted.
 #' @param resume_evaluations Optional named list of compact prior fit records,
 #'   keyed by canonical assignment ID, for deterministic route reconstruction.
+#' @param prefix_sizes Optional strictly increasing positive integer prefix
+#'   sizes for `method = "proxy_prefix"`; `NULL` uses the registered default.
 #' @return An `ab_search_result` with upper-bound-only evidence semantics.
 search_breakpoint <- function(x, method = c(
                                 "proxy_prefix", "greedy", "random", "pair", "greedy_random",
@@ -237,7 +239,8 @@ search_breakpoint <- function(x, method = c(
                               warm_start_assignment = NULL,
                               progress_callback = NULL,
                               progress_every = 1L,
-                              resume_evaluations = NULL) {
+                              resume_evaluations = NULL,
+                              prefix_sizes = NULL) {
   method <- match.arg(method)
   direction <- match.arg(direction)
   invalid <- character()
@@ -300,6 +303,16 @@ search_breakpoint <- function(x, method = c(
   }
   if (identical(method, "proxy_prefix") && !identical(direction, "all")) {
     invalid <- c(invalid, "proxy_prefix requires direction = 'all'")
+  }
+  if (!is.null(prefix_sizes) && !identical(method, "proxy_prefix")) {
+    invalid <- c(invalid, "prefix_sizes is supported only by method = 'proxy_prefix'")
+  }
+  if (identical(method, "proxy_prefix") && !is.null(prefix_sizes)) {
+    prefix_error <- tryCatch({
+      .ab_proxy_prefix_sizes(prefix_sizes)
+      NULL
+    }, error = function(e) conditionMessage(e))
+    if (!is.null(prefix_error)) invalid <- c(invalid, prefix_error)
   }
   if (identical(method, "proxy_prefix") &&
       (!identical(as.integer(candidate_block_size), 8L) ||
@@ -391,7 +404,8 @@ search_breakpoint <- function(x, method = c(
   }
   if (identical(method, "proxy_prefix")) {
     return(.ab_search_proxy_prefix(
-      x, data, hashes, resolved, max_fits, seed, max_proposals, max_seconds
+      x, data, hashes, resolved, max_fits, seed, max_proposals, max_seconds,
+      prefix_sizes = prefix_sizes
     ))
   }
   resume_fit_by_id <- new.env(hash = TRUE, parent = emptyenv())

@@ -2,6 +2,7 @@
                               warnings = character(), diagnostics = list(),
                               started = NULL) {
   elapsed <- if (is.null(started)) NA_real_ else unname(proc.time()[["elapsed"]] - started)
+  runtime <- .ab_runtime_contract(data)
   out <- list(
     status = "not_assessable",
     beta = NA_real_,
@@ -25,7 +26,8 @@
     pseudobulk = pseudobulk,
     analysis_id = data$analysis_spec$analysis_id,
     backend = data$analysis_spec$backend$package,
-    backend_version = data$analysis_spec$backend$version,
+    backend_version = runtime$observed_backend_version,
+    runtime = runtime,
     evaluation_identity = .ab_authoritative_identity(data),
     fit_elapsed_seconds = elapsed,
     authoritative_rebuild = TRUE
@@ -52,6 +54,7 @@ fit_edger_claim <- function(x, assignment = NULL, pseudobulk = NULL) {
       assignment = NULL, assignment_id = NA_character_, pseudobulk = NULL,
       analysis_id = NA_character_, backend = "edgeR",
       backend_version = NA_character_, evaluation_identity = NULL,
+      runtime = NULL,
       fit_elapsed_seconds = unname(proc.time()[["elapsed"]] - started),
       authoritative_rebuild = FALSE
     ), class = "ab_fit"))
@@ -84,28 +87,14 @@ fit_edger_claim <- function(x, assignment = NULL, pseudobulk = NULL) {
       paste(failures, collapse = ";"), started = started
     ))
   }
-  if (!requireNamespace("edgeR", quietly = TRUE)) {
+  runtime <- .ab_runtime_contract(data)
+  if (!isTRUE(runtime$compatible)) {
     return(.ab_edger_failure(
-      data, assignment, NULL, "backend_unavailable",
-      "edgeR is not installed in the active library path", started = started
+      data, assignment, NULL, runtime$failure_reason, runtime$message,
+      started = started
     ))
   }
-  observed_version <- as.character(utils::packageVersion("edgeR"))
-  if (!identical(observed_version, data$analysis_spec$backend$version)) {
-    return(.ab_edger_failure(
-      data, assignment, NULL, "backend_version_mismatch",
-      paste0("expected edgeR ", data$analysis_spec$backend$version,
-             ", observed ", observed_version), started = started
-    ))
-  }
-  observed_r <- paste(R.version$major, R.version$minor, sep = ".")
-  if (!identical(observed_r, data$analysis_spec$backend$r_version)) {
-    return(.ab_edger_failure(
-      data, assignment, NULL, "r_version_mismatch",
-      paste0("expected R ", data$analysis_spec$backend$r_version,
-             ", observed ", observed_r), started = started
-    ))
-  }
+  observed_version <- runtime$observed_backend_version
 
   rebuilt <- tryCatch(build_pseudobulk(x, assignment, method = "full"),
                       error = function(e) e)
@@ -162,7 +151,10 @@ fit_edger_claim <- function(x, assignment = NULL, pseudobulk = NULL) {
     focal_meta$condition,
     levels = c(data$claim$control_condition, data$claim$case_condition)
   )
-  design <- stats::model.matrix(~ condition)
+  design <- stats::model.matrix(
+    ~ condition,
+    data = data.frame(condition = condition)
+  )
   colnames(design) <- c("(Intercept)", "case_vs_control")
   rownames(design) <- focal_meta$sample_id
   diagnostics$design <- design
@@ -334,6 +326,7 @@ fit_edger_claim <- function(x, assignment = NULL, pseudobulk = NULL) {
     analysis_id = data$analysis_spec$analysis_id,
     backend = data$analysis_spec$backend$package,
     backend_version = observed_version,
+    runtime = runtime,
     evaluation_identity = .ab_authoritative_identity(data),
     fit_elapsed_seconds = unname(proc.time()[["elapsed"]] - started),
     authoritative_rebuild = TRUE

@@ -44,6 +44,156 @@
   )
 }
 
+.ab_normalize_runtime_policy <- function(runtime_policy) {
+  if (is.null(runtime_policy)) return("strict")
+  match.arg(runtime_policy, c("strict", "compatible"))
+}
+
+.ab_major_minor <- function(version) {
+  value <- tryCatch(base::package_version(as.character(version)),
+                    error = function(e) NULL)
+  if (is.null(value) || !length(value)) return(NA_character_)
+  parts <- unclass(value)[[1L]]
+  if (length(parts) < 2L) return(NA_character_)
+  paste(parts[1:2], collapse = ".")
+}
+
+.ab_runtime_version_allowed <- function(observed, expected,
+                                        policy = c("strict", "compatible")) {
+  policy <- .ab_normalize_runtime_policy(policy)
+  if (identical(policy, "strict")) return(identical(observed, expected))
+  observed_mm <- .ab_major_minor(observed)
+  expected_mm <- .ab_major_minor(expected)
+  !is.na(observed_mm) && !is.na(expected_mm) && identical(observed_mm, expected_mm)
+}
+
+.ab_edger_api_support <- function() {
+  required_exports <- c(
+    "DGEList", "filterByExpr", "calcNormFactors", "glmQLFit", "glmQLFTest"
+  )
+  if (!requireNamespace("edgeR", quietly = TRUE)) {
+    return(list(ok = FALSE, missing = "edgeR namespace", details = character()))
+  }
+  exports <- getNamespaceExports("edgeR")
+  missing_exports <- setdiff(required_exports, exports)
+  details <- character()
+  qlfit_default <- tryCatch(
+    utils::getS3method("glmQLFit", "default", envir = asNamespace("edgeR")),
+    error = function(e) NULL
+  )
+  qlfit_dgelist <- tryCatch(
+    utils::getS3method("glmQLFit", "DGEList", envir = asNamespace("edgeR")),
+    error = function(e) NULL
+  )
+  qlf_test <- tryCatch(getExportedValue("edgeR", "glmQLFTest"),
+                       error = function(e) NULL)
+  required_fit_formals <- c(
+    "design", "dispersion", "abundance.trend", "robust", "legacy",
+    "top.proportion"
+  )
+  fit_formals <- unique(c(
+    if (is.function(qlfit_default)) names(formals(qlfit_default)) else character(),
+    if (is.function(qlfit_dgelist)) names(formals(qlfit_dgelist)) else character()
+  ))
+  missing_fit_formals <- setdiff(required_fit_formals, fit_formals)
+  if (length(missing_fit_formals)) {
+    details <- c(details, paste0(
+      "glmQLFit lacks required arguments: ",
+      paste(missing_fit_formals, collapse = ",")
+    ))
+  }
+  test_formals <- if (is.function(qlf_test)) names(formals(qlf_test)) else character()
+  missing_test_formals <- setdiff(c("coef", "poisson.bound"), test_formals)
+  if (length(missing_test_formals)) {
+    details <- c(details, paste0(
+      "glmQLFTest lacks required arguments: ",
+      paste(missing_test_formals, collapse = ",")
+    ))
+  }
+  list(
+    ok = !length(missing_exports) && !length(details),
+    missing = missing_exports,
+    details = details
+  )
+}
+
+.ab_runtime_contract <- function(data, observed_r = NULL,
+                                 observed_backend = NULL, api = NULL) {
+  policy <- .ab_normalize_runtime_policy(data$runtime_policy)
+  if (is.null(observed_r)) {
+    observed_r <- paste(R.version$major, R.version$minor, sep = ".")
+  }
+  if (is.null(data$analysis_spec)) {
+    return(list(
+      policy = policy,
+      expected_r_version = NA_character_,
+      observed_r_version = observed_r,
+      expected_backend_version = NA_character_,
+      observed_backend_version = NA_character_,
+      api_supported = TRUE,
+      compatible = TRUE,
+      failure_reason = NA_character_,
+      message = NA_character_
+    ))
+  }
+  expected_r <- data$analysis_spec$backend$r_version
+  expected_backend <- data$analysis_spec$backend$version
+  backend_available <- if (is.null(observed_backend)) {
+    requireNamespace("edgeR", quietly = TRUE)
+  } else {
+    !is.na(observed_backend) && nzchar(observed_backend)
+  }
+  if (is.null(observed_backend)) {
+    observed_backend <- if (backend_available) {
+      as.character(utils::packageVersion("edgeR"))
+    } else {
+      NA_character_
+    }
+  }
+  if (is.null(api)) api <- .ab_edger_api_support()
+  r_allowed <- .ab_runtime_version_allowed(observed_r, expected_r, policy)
+  backend_allowed <- .ab_runtime_version_allowed(
+    observed_backend, expected_backend, policy
+  )
+  compatible <- isTRUE(api$ok) && r_allowed && backend_allowed
+  failure_reason <- NA_character_
+  message <- NA_character_
+  if (!backend_available) {
+    failure_reason <- "backend_unavailable"
+    message <- "edgeR is not installed in the active library path"
+  } else if (!isTRUE(api$ok)) {
+    failure_reason <- "unsupported_backend_api"
+    message <- paste(
+      c(
+        if (length(api$missing)) paste0(
+          "edgeR lacks required exports: ", paste(api$missing, collapse = ",")
+        ),
+        api$details
+      ),
+      collapse = "; "
+    )
+  } else if (!r_allowed) {
+    failure_reason <- "r_version_mismatch"
+    message <- paste0("expected R ", expected_r, ", observed ", observed_r,
+                      " under runtime policy ", policy)
+  } else if (!backend_allowed) {
+    failure_reason <- "backend_version_mismatch"
+    message <- paste0("expected edgeR ", expected_backend, ", observed ",
+                      observed_backend, " under runtime policy ", policy)
+  }
+  list(
+    policy = policy,
+    expected_r_version = expected_r,
+    observed_r_version = observed_r,
+    expected_backend_version = expected_backend,
+    observed_backend_version = observed_backend,
+    api_supported = isTRUE(api$ok),
+    compatible = isTRUE(compatible),
+    failure_reason = failure_reason,
+    message = message
+  )
+}
+
 .ab_compare_spec <- function(value, expected, path = "analysis_spec") {
   errors <- character()
   if (is.list(expected)) {
@@ -141,6 +291,7 @@
 }
 
 .ab_authoritative_identity <- function(data) {
+  runtime <- .ab_runtime_contract(data)
   if (is.null(data$analysis_spec)) {
     return(list(
       type = "authoritative",
@@ -148,6 +299,10 @@
       analysis_id = "portable-log-proportion-contrast-v1",
       backend = "Layer-A",
       backend_version = NA_character_,
+      runtime_policy = runtime$policy,
+      expected_r_version = runtime$expected_r_version,
+      observed_r_version = runtime$observed_r_version,
+      runtime_compatible = runtime$compatible,
       specification_hash = unname(data$input_hashes[["specification_hash"]])
     ))
   }
@@ -156,7 +311,13 @@
     evaluation_id = data$analysis_spec$analysis_id,
     analysis_id = data$analysis_spec$analysis_id,
     backend = data$analysis_spec$backend$package,
-    backend_version = data$analysis_spec$backend$version,
+    backend_version = runtime$observed_backend_version,
+    expected_backend_version = runtime$expected_backend_version,
+    runtime_policy = runtime$policy,
+    expected_r_version = runtime$expected_r_version,
+    observed_r_version = runtime$observed_r_version,
+    runtime_api_supported = runtime$api_supported,
+    runtime_compatible = runtime$compatible,
     nuisance_policy_version = data$analysis_spec$nuisance_policy_version,
     cache_policy_version = data$analysis_spec$cache_policy_version,
     specification_hash = unname(data$input_hashes[["specification_hash"]])

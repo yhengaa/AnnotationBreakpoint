@@ -1,8 +1,20 @@
-.ab_proxy_prefix_sizes <- function() {
-  c(1L, 2L, 4L, 8L, 16L, 32L, 64L, 128L)
+.ab_proxy_prefix_sizes <- function(prefix_sizes = NULL) {
+  if (is.null(prefix_sizes)) {
+    return(c(1L, 2L, 4L, 8L, 16L, 32L, 64L, 128L))
+  }
+  if (!is.numeric(prefix_sizes) || !length(prefix_sizes) ||
+      anyNA(prefix_sizes) || any(!is.finite(prefix_sizes)) ||
+      any(prefix_sizes < 1) || any(prefix_sizes != floor(prefix_sizes)) ||
+      anyDuplicated(prefix_sizes) || is.unsorted(prefix_sizes, strictly = TRUE)) {
+    stop(
+      "prefix_sizes must be a strictly increasing list of unique positive integers",
+      call. = FALSE
+    )
+  }
+  as.integer(prefix_sizes)
 }
 
-.ab_proxy_prefix_plan <- function(data) {
+.ab_proxy_prefix_plan <- function(data, prefix_sizes = NULL) {
   cache <- .ab_proxy_cell_cache(data)
   ranked <- .ab_proxy_ranked_source(
     data,
@@ -38,7 +50,8 @@
       call. = FALSE
     )
   }
-  available <- .ab_proxy_prefix_sizes()
+  registered <- .ab_proxy_prefix_sizes(prefix_sizes)
+  available <- registered
   available <- available[available <= nrow(ranking)]
   assignments <- if (length(available)) {
     stats::setNames(lapply(available, function(k) {
@@ -53,7 +66,7 @@
   list(
     route = "observed_centered_proxy_ranked_cumulative_prefixes",
     ranking = ranking,
-    registered_prefix_sizes = .ab_proxy_prefix_sizes(),
+    registered_prefix_sizes = registered,
     available_prefix_sizes = available,
     assignments = assignments,
     ranking_frozen_before_fits = TRUE,
@@ -219,9 +232,13 @@
 }
 
 .ab_search_proxy_prefix <- function(x, data, hashes, resolved, max_fits,
-                                    seed, max_proposals, max_seconds) {
+                                    seed, max_proposals, max_seconds,
+                                    prefix_sizes = NULL) {
   started <- unname(proc.time()[["elapsed"]])
-  plan <- tryCatch(.ab_proxy_prefix_plan(data), error = function(e) e)
+  plan <- tryCatch(
+    .ab_proxy_prefix_plan(data, prefix_sizes = prefix_sizes),
+    error = function(e) e
+  )
   if (inherits(plan, "error")) {
     result <- .ab_search_skeleton("invalid_input", "invalid_proxy_prefix_domain", hashes)
     result$errors <- conditionMessage(plan)

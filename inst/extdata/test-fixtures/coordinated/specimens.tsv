@@ -1,0 +1,5 @@
+sample_id	donor_id	condition
+S_C1	D_C1	control
+S_C2	D_C2	control
+S_K1	D_K1	case
+S_K2	D_K2	case

@@ -1,0 +1,100 @@
+name: R package checks
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: r-check-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  strict-reproduction:
+    name: Strict reproduction (R 4.5.0 / Bioconductor 3.21)
+    runs-on: ubuntu-latest
+    env:
+      R_BIOC_VERSION: "3.21"
+      R_KEEP_PKG_SOURCE: yes
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: r-lib/actions/setup-r@v2
+        with:
+          r-version: "4.5.0"
+          use-public-rspm: true
+
+      - uses: r-lib/actions/setup-pandoc@v2
+
+      - uses: r-lib/actions/setup-r-dependencies@v2
+        with:
+          extra-packages: |
+            any::BiocManager
+            any::rcmdcheck
+          needs: check
+          cache-version: 1
+
+      - name: Verify frozen runtime
+        shell: Rscript {0}
+        run: |
+          stopifnot(as.character(getRversion()) == "4.5.0")
+          stopifnot(as.character(packageVersion("edgeR")) == "4.6.3")
+
+      - name: Check package and vignette
+        shell: Rscript {0}
+        run: |
+          rcmdcheck::rcmdcheck(
+            args = c("--no-manual", "--as-cran"),
+            error_on = "error"
+          )
+
+      - name: Run strict authoritative fixture
+        shell: bash
+        run: |
+          R CMD INSTALL .
+          AB_CLI=$(Rscript --vanilla -e 'cat(system.file("exec", "annotation-breakpoint", package="AnnotationBreakpoint"))')
+          AB_EXAMPLE=$(Rscript --vanilla -e 'cat(system.file("extdata", "examples", "edger_witness", package="AnnotationBreakpoint"))')
+          Rscript --vanilla "$AB_CLI" --input-dir "$AB_EXAMPLE" --analysis-spec "$AB_EXAMPLE/analysis_spec.yaml" --output-dir ab-output/strict --method proxy_prefix --max-fits 32 --seed 82901
+          Rscript --vanilla -e 'r <- jsonlite::read_json("ab-output/strict/result.json", simplifyVector = TRUE); v <- jsonlite::read_json("ab-output/strict/verification.json", simplifyVector = TRUE); stopifnot(identical(r$status, "verified_counterexample"), identical(as.integer(r$best_verified_cost), 1L), isTRUE(v$ok), identical(as.integer(v$recomputed_cost), 1L), identical(r$backend_identity$runtime_policy, "strict"))'
+
+  compatible-runtime:
+    name: Compatible patch runtime (R 4.5.2 / Bioconductor 3.21)
+    runs-on: ubuntu-latest
+    env:
+      R_BIOC_VERSION: "3.21"
+      R_KEEP_PKG_SOURCE: yes
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: r-lib/actions/setup-r@v2
+        with:
+          r-version: "4.5.2"
+          use-public-rspm: true
+
+      - uses: r-lib/actions/setup-pandoc@v2
+
+      - uses: r-lib/actions/setup-r-dependencies@v2
+        with:
+          extra-packages: any::BiocManager
+          needs: check
+          cache-version: 1
+
+      - name: Verify compatible version family
+        shell: Rscript {0}
+        run: |
+          stopifnot(as.character(getRversion()) == "4.5.2")
+          edgeR_version <- as.character(packageVersion("edgeR"))
+          stopifnot(sub("\\.[^.]+$", "", edgeR_version) == "4.6")
+
+      - name: Install package and run compatibility fixture
+        shell: bash
+        run: |
+          R CMD INSTALL .
+          AB_CLI=$(Rscript --vanilla -e 'cat(system.file("exec", "annotation-breakpoint", package="AnnotationBreakpoint"))')
+          AB_EXAMPLE=$(Rscript --vanilla -e 'cat(system.file("extdata", "examples", "edger_witness", package="AnnotationBreakpoint"))')
+          Rscript --vanilla "$AB_CLI" --input-dir "$AB_EXAMPLE" --analysis-spec "$AB_EXAMPLE/analysis_spec.yaml" --allow-version-mismatch --output-dir ab-output/compatible --method proxy_prefix --max-fits 32 --seed 82901
+          Rscript --vanilla -e 'r <- jsonlite::read_json("ab-output/compatible/result.json", simplifyVector = TRUE); v <- jsonlite::read_json("ab-output/compatible/verification.json", simplifyVector = TRUE); stopifnot(identical(r$status, "verified_counterexample"), identical(as.integer(r$best_verified_cost), 1L), isTRUE(v$ok), identical(as.integer(v$recomputed_cost), 1L), identical(r$backend_identity$runtime_policy, "compatible"))'

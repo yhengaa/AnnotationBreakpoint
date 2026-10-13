@@ -1,0 +1,5 @@
+rank	changes	cost	feasible	beta	overturn	expected_status	expected_best_verified_cost	expected_exact_minimum_cost
+0	original	0	true	2.8810059682984246	false	exhaustively_stable	NA	NA
+1	ST_K1_out=B	1	true	2.880418384247328	false	exhaustively_stable	NA	NA
+2	ST_K2_in=A	1	true	2.592086935154537	false	exhaustively_stable	NA	NA
+3	ST_K1_out=B;ST_K2_in=A	2	true	2.5914993511034403	false	exhaustively_stable	NA	NA

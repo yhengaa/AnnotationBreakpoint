@@ -6,18 +6,36 @@
 #' @param allowed_labels Cell-specific permitted labels and provenance.
 #' @param claim A named one-row object describing the registered claim.
 #' @param constraints A named one-row object describing budgets and minima.
+#' @param analysis_spec Optional frozen authoritative edgeR analysis specification.
+#' @param runtime_policy `"strict"` requires the registered R and edgeR versions;
+#'   `"compatible"` permits patch-version differences only after required API checks.
 #' @return An object of class `ab_validation`.
 #' @export
 validate_inputs <- function(counts, cells, specimens, allowed_labels,
-                            claim, constraints, analysis_spec = NULL) {
+                            claim, constraints, analysis_spec = NULL,
+                            runtime_policy = c("strict", "compatible")) {
   errors <- character()
   warnings <- character()
   add_error <- function(message) {
     errors <<- c(errors, as.character(message))
   }
+  normalized_runtime_policy <- tryCatch(
+    .ab_normalize_runtime_policy(runtime_policy), error = function(e) e
+  )
+  if (inherits(normalized_runtime_policy, "error")) {
+    errors <- c(errors, conditionMessage(normalized_runtime_policy))
+    normalized_runtime_policy <- "strict"
+  }
   normalized_analysis <- .ab_normalize_analysis_spec(analysis_spec)
   if (!normalized_analysis$ok) {
     errors <- c(errors, normalized_analysis$errors)
+  }
+  if (identical(normalized_runtime_policy, "compatible") &&
+      is.null(analysis_spec)) {
+    errors <- c(
+      errors,
+      "runtime_policy = 'compatible' requires an authoritative analysis_spec"
+    )
   }
 
   required_cells <- c(
@@ -489,7 +507,8 @@ validate_inputs <- function(counts, cells, specimens, allowed_labels,
     donor_ids = donor_ids,
     allowed_by_cell = allowed_by_cell,
     original_assignment = original_assignment,
-    analysis_spec = normalized_analysis$spec
+    analysis_spec = normalized_analysis$spec,
+    runtime_policy = normalized_runtime_policy
   )
   original_failures <- .ab_constraint_failures(data, original_assignment)
   if (length(original_failures)) {

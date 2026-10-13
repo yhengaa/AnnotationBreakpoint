@@ -1,0 +1,16 @@
+citHeader("To cite AnnotationBreakpoint in publications, use:")
+
+bibentry(
+  bibtype = "Manual",
+  title = "AnnotationBreakpoint: Annotation Reassignment Sensitivity Reference and Search",
+  author = person(
+    given = "Youshan",
+    family = "Heng",
+    email = "youshan@ualberta.ca",
+    role = c("aut", "cre"),
+    comment = c(ORCID = "0000-0002-2758-171X")
+  ),
+  year = "2026",
+  note = "R package version 0.3.0",
+  url = "https://github.com/yhengaa/AnnotationBreakpoint"
+)

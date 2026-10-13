@@ -98,6 +98,9 @@
       claim_holds = original$claim_holds,
       overturn = original$overturn,
       error = original$error,
+      failure_reason = original$failure_reason,
+      warnings = original$warnings,
+      runtime = original$runtime,
       sample_expression = original$sample_expression
     ),
     assignment_accounting = list(
@@ -251,6 +254,32 @@ render_report <- function(result, verification, output_dir,
   } else {
     result$original_fit$margin
   }
+  original_failure_reason <- if (is.null(result$original_fit) ||
+                                 is.null(result$original_fit$failure_reason)) {
+    NA_character_
+  } else as.character(result$original_fit$failure_reason)
+  original_error <- if (is.null(result$original_fit) ||
+                        is.null(result$original_fit$error)) {
+    NA_character_
+  } else as.character(result$original_fit$error)
+  original_warnings <- if (is.null(result$original_fit) ||
+                           !length(result$original_fit$warnings)) {
+    NA_character_
+  } else paste(unique(as.character(result$original_fit$warnings)), collapse = " | ")
+  runtime <- if (!is.null(result$original_fit) &&
+                 !is.null(result$original_fit$runtime)) {
+    result$original_fit$runtime
+  } else {
+    list(
+      policy = result$backend_identity$runtime_policy,
+      expected_r_version = result$backend_identity$expected_r_version,
+      observed_r_version = result$backend_identity$observed_r_version,
+      expected_backend_version = result$backend_identity$expected_backend_version,
+      observed_backend_version = result$backend_identity$backend_version,
+      api_supported = result$backend_identity$runtime_api_supported,
+      compatible = result$backend_identity$runtime_compatible
+    )
+  }
   claim_results <- data.frame(
     status = result$status,
     evidence_label = result$status,
@@ -278,6 +307,26 @@ render_report <- function(result, verification, output_dir,
     direction = if (!is.null(result$direction)) result$direction else "all",
     original_beta_log2 = original_beta,
     original_margin_log2 = original_margin,
+    original_fit_status = .ab_named_or_na(
+      if (is.null(result$original_fit)) NULL else result$original_fit$status,
+      "character"
+    ),
+    original_failure_reason = original_failure_reason,
+    original_error = original_error,
+    original_warnings = original_warnings,
+    runtime_policy = .ab_named_or_na(runtime$policy, "character"),
+    expected_r_version = .ab_named_or_na(runtime$expected_r_version, "character"),
+    observed_r_version = .ab_named_or_na(runtime$observed_r_version, "character"),
+    expected_backend_version = .ab_named_or_na(
+      runtime$expected_backend_version, "character"
+    ),
+    observed_backend_version = .ab_named_or_na(
+      runtime$observed_backend_version, "character"
+    ),
+    runtime_api_supported = if (is.null(runtime$api_supported)) NA else
+      isTRUE(runtime$api_supported),
+    runtime_compatible = if (is.null(runtime$compatible)) NA else
+      isTRUE(runtime$compatible),
     best_verified_cost = .ab_named_or_na(result$best_verified_cost, "integer"),
     exact_minimum_cost = .ab_named_or_na(result$exact_minimum_cost, "integer"),
     certified_lower_bound = .ab_named_or_na(result$certified_lower_bound, "integer"),
@@ -426,7 +475,7 @@ render_report <- function(result, verification, output_dir,
   writeLines(search_lines, paths[["search_log"]], useBytes = TRUE)
 
   markdown <- c(
-    "# Annotation Breakpoint exact-reference report",
+    "# Annotation Breakpoint report",
     "",
     paste0("Status: `", result$status, "`."),
     "",
@@ -445,6 +494,13 @@ render_report <- function(result, verification, output_dir,
     ),
     "",
     paste0("Original beta (log2): `", .ab_markdown_value(original_beta), "`."),
+    paste0("Original fit status: `",
+           .ab_markdown_value(claim_results$original_fit_status), "`."),
+    paste0("Original fit failure reason: `",
+           .ab_markdown_value(original_failure_reason), "`."),
+    paste0("Original fit error: `", .ab_markdown_value(original_error), "`."),
+    paste0("Original fit warnings: `",
+           .ab_markdown_value(original_warnings), "`."),
     paste0("Best verified cost: `",
            .ab_markdown_value(result$best_verified_cost), "`."),
     paste0("Exact minimum cost: `",
@@ -463,6 +519,14 @@ render_report <- function(result, verification, output_dir,
     paste0("Witness verification: `", verification$ok, "`."),
     paste0("Analysis: `", .ab_markdown_value(result$analysis_id), "`; evaluation: `",
            .ab_markdown_value(result$evaluation_identity$evaluation_id), "`."),
+    paste0(
+      "Runtime policy: `", .ab_markdown_value(runtime$policy),
+      "`; R expected/observed: `", .ab_markdown_value(runtime$expected_r_version),
+      "` / `", .ab_markdown_value(runtime$observed_r_version),
+      "`; edgeR expected/observed: `",
+      .ab_markdown_value(runtime$expected_backend_version), "` / `",
+      .ab_markdown_value(runtime$observed_backend_version), "`."
+    ),
     paste0("Search fits: `", claim_results$search_fit_count,
            "`; independent verification fits: `", verification$verification_fit_count,
            "`."),

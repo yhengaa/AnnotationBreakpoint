@@ -1,0 +1,157 @@
+---
+title: "Annotation Breakpoint workflow"
+author: "Youshan Heng"
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteIndexEntry{Annotation Breakpoint workflow}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(collapse = TRUE, comment = "#>")
+```
+
+Annotation Breakpoint asks a conditional sensitivity question: under a fixed
+set of allowed cell labels, constraints, and an analysis specification, how
+many label changes are sufficient to move a registered donor-level expression
+effect to its decision boundary? A returned witness describes sensitivity to
+the declared inputs. It does not identify the biologically correct labels.
+
+## Read and validate an input
+
+The installed `exact_toy` directory contains the six ordinary input tables.
+The reader is also used by the command-line interface.
+
+```{r validate}
+library(AnnotationBreakpoint)
+
+example_dir <- system.file(
+  "extdata", "examples", "exact_toy",
+  package = "AnnotationBreakpoint"
+)
+read_inputs <- getFromNamespace(
+  "read_input_directory", "AnnotationBreakpoint"
+)
+inputs <- read_inputs(example_dir)
+
+validation <- do.call(
+  validate_inputs,
+  inputs[c(
+    "counts", "cells", "specimens", "allowed_labels",
+    "claim", "constraints", "analysis_spec"
+  )]
+)
+stopifnot(validation$ok)
+validation$status
+```
+
+For the authoritative edgeR backend, pass the frozen analysis specification
+and leave `runtime_policy = "strict"`, the default. Strict mode requires the
+recorded R and edgeR versions exactly. When only the patch version differs,
+`runtime_policy = "compatible"` requests a capability-checked run:
+
+```{r compatible-policy, eval=FALSE}
+validation <- validate_inputs(
+  counts, cells, specimens, allowed_labels, claim, constraints,
+  analysis_spec = analysis_spec,
+  runtime_policy = "compatible"
+)
+```
+
+Compatible mode does not relax the analysis specification. It rejects major
+or minor version differences and an edgeR installation without the required
+quasi-likelihood arguments. Results, cache identity, and replay records retain
+the expected and observed runtime versions and the selected policy.
+
+## Run the default search
+
+`proxy_prefix` ranks permitted single-cell changes once at the observed labels
+and fully refits the available cumulative prefixes at fixed sizes. An
+inadmissible exact prefix is recorded and skipped without repair. The smallest
+evaluated crossing is independently replayed before it is reported.
+
+```{r proxy-prefix}
+search <- search_breakpoint(
+  validation,
+  method = "proxy_prefix",
+  max_fits = 32,
+  seed = 82901L
+)
+c(
+  status = search$status,
+  best_verified_cost = search$best_verified_cost
+)
+```
+
+A `verified_counterexample` is an upper bound on breakpoint cost. A
+`no_counterexample_found` result remains unresolved because the practical
+route does not rule out untested assignments.
+
+The same frozen-ranking method can evaluate a caller-supplied prefix schedule:
+
+```{r custom-prefixes, eval=FALSE}
+custom_search <- search_breakpoint(
+  validation,
+  method = "proxy_prefix",
+  max_fits = 32,
+  seed = 82901L,
+  prefix_sizes = c(1L, 3L, 6L, 12L)
+)
+```
+
+`prefix_sizes` must be a unique, strictly increasing vector of positive
+integers. It selects exact prefixes from the same ranking; it does not trigger
+reranking or constraint repair. The selected schedule is recorded in result
+identity and the prefix log. Leaving it `NULL` uses
+`c(1, 2, 4, 8, 16, 32, 64, 128)`. The CLI equivalent is
+`--prefix-sizes 1,3,6,12`.
+
+The requested schedule is available as
+`custom_search$proxy_prefix$registered_prefix_sizes`; the subset that fits the
+declared domain is `custom_search$proxy_prefix$available_prefix_sizes`.
+
+## Use exact enumeration for a small domain
+
+Exact enumeration is the one supported alternative. It is limited to at most
+12 ambiguous cells and 4,096 allowed assignments. An `exact_minimum` rules out
+every cheaper feasible assignment; `exhaustively_stable` means every feasible
+assignment fitted successfully and none crossed the threshold.
+
+```{r exact}
+exact <- enumerate_breakpoint(validation)
+c(
+  status = exact$status,
+  exact_minimum_cost = exact$exact_minimum_cost
+)
+```
+
+## Replay and render
+
+Replay recomputes hashes, constraints, cost, assignment identity, and fitted
+effects from the immutable inputs. A report can be rendered only from a
+successful verification tied to the same result.
+
+```{r replay}
+verification <- verify_witness(validation, exact)
+stopifnot(verification$ok)
+
+output_dir <- file.path(tempdir(), "annotation-breakpoint-example")
+artifacts <- render_report(
+  exact,
+  verification,
+  output_dir,
+  run_metadata = list(example = "exact_toy", interface = "R")
+)
+basename(artifacts$paths)
+```
+
+The report directory contains JSON and TSV records plus a readable Markdown
+summary. If the original fit is unavailable, its structured failure reason,
+backend error, warnings, and expected/observed runtime versions remain in the
+result artifacts. These fields distinguish a failed or mismatched analysis
+from a valid no-hit.
+
+The repository's [evidence index](https://github.com/yhengaa/AnnotationBreakpoint/blob/main/reports/PUBLICATION/README.md)
+preserves the saved positive examples together with negative and inconclusive
+evaluation results.

@@ -6,6 +6,7 @@ options <- list(
   input_dir = NULL,
   analysis_spec = NULL,
   layer_a = FALSE,
+  allow_version_mismatch = FALSE,
   output_dir = NULL,
   method = "proxy_prefix",
   max_evaluations = Inf,
@@ -13,15 +14,17 @@ options <- list(
   max_proposals = Inf,
   max_seconds = Inf,
   seed = 82901L,
-  direction = "all"
+  prefix_sizes = NULL
 )
 
 usage <- paste(
   "usage: annotation-breakpoint",
   "(--fixture-dir PATH | --input-dir PATH (--analysis-spec YAML | --layer-a))",
-  "--output-dir PATH [--method proxy_prefix|exact|random|greedy|pair; default proxy_prefix]",
+  "--output-dir PATH [--method proxy_prefix|exact; default proxy_prefix]",
+  "[--allow-version-mismatch]",
+  "[--prefix-sizes 1,2,4,8,16,32,64,128]",
   "[--max-evaluations N] [--max-fits N] [--max-proposals N]",
-  "[--max-seconds N] [--seed N] [--direction all|outgoing_only]"
+  "[--max-seconds N] [--seed N]"
 )
 
 take_value <- function(flag, remaining) {
@@ -44,6 +47,9 @@ while (length(args)) {
   } else if (key == "--layer-a") {
     options$layer_a <- TRUE
     consumed <- 1L
+  } else if (key == "--allow-version-mismatch") {
+    options$allow_version_mismatch <- TRUE
+    consumed <- 1L
   } else if (key == "--output-dir") {
     options$output_dir <- take_value(key, args)
   } else if (key == "--method") {
@@ -58,8 +64,12 @@ while (length(args)) {
     options$max_seconds <- suppressWarnings(as.numeric(take_value(key, args)))
   } else if (key == "--seed") {
     options$seed <- suppressWarnings(as.integer(take_value(key, args)))
-  } else if (key == "--direction") {
-    options$direction <- take_value(key, args)
+  } else if (key == "--prefix-sizes") {
+    raw_prefix_sizes <- strsplit(take_value(key, args), ",", fixed = TRUE)[[1L]]
+    if (!length(raw_prefix_sizes) || any(!nzchar(raw_prefix_sizes))) {
+      stop("--prefix-sizes requires comma-separated positive integers", call. = FALSE)
+    }
+    options$prefix_sizes <- suppressWarnings(as.numeric(raw_prefix_sizes))
   } else {
     stop(usage, call. = FALSE)
   }
@@ -72,15 +82,11 @@ provided_inputs <- !vapply(
 if (is.null(options$output_dir) || sum(provided_inputs) != 1L) {
   stop(usage, call. = FALSE)
 }
-if (!options$method %in% c("proxy_prefix", "exact", "random", "greedy", "pair")) {
-  stop("--method must be proxy_prefix, exact, random, greedy, or pair", call. = FALSE)
+if (!options$method %in% c("proxy_prefix", "exact")) {
+  stop("--method must be proxy_prefix or exact", call. = FALSE)
 }
-if (!options$direction %in% c("all", "outgoing_only")) {
-  stop("--direction must be all or outgoing_only", call. = FALSE)
-}
-if (identical(options$method, "exact") &&
-    identical(options$direction, "outgoing_only")) {
-  stop("--direction outgoing_only is unavailable with --method exact", call. = FALSE)
+if (identical(options$method, "exact") && !is.null(options$prefix_sizes)) {
+  stop("--prefix-sizes is available only with --method proxy_prefix", call. = FALSE)
 }
 if (!is.null(options$input_dir) &&
     identical(is.null(options$analysis_spec), !isTRUE(options$layer_a))) {
@@ -90,6 +96,14 @@ if (!is.null(options$input_dir) &&
 if (!is.null(options$fixture_dir) &&
     (!is.null(options$analysis_spec) || isTRUE(options$layer_a))) {
   stop("fixture mode does not accept --analysis-spec or --layer-a", call. = FALSE)
+}
+if (isTRUE(options$allow_version_mismatch) &&
+    (is.null(options$analysis_spec) || !is.null(options$fixture_dir) ||
+     isTRUE(options$layer_a))) {
+  stop(
+    "--allow-version-mismatch requires normal input with --analysis-spec",
+    call. = FALSE
+  )
 }
 
 suppressPackageStartupMessages(library(AnnotationBreakpoint))
@@ -105,16 +119,19 @@ if (!is.null(options$fixture_dir)) {
   reader <- getFromNamespace("read_input_directory", "AnnotationBreakpoint")
   inputs <- reader(options$input_dir, analysis_spec = analysis_spec)
 }
-validation <- do.call(
-  validate_inputs,
-  inputs[intersect(
-    c(
-      "counts", "cells", "specimens", "allowed_labels", "claim",
-      "constraints", "analysis_spec"
-    ),
-    names(inputs)
-  )]
-)
+validation_args <- inputs[intersect(
+  c(
+    "counts", "cells", "specimens", "allowed_labels", "claim",
+    "constraints", "analysis_spec"
+  ),
+  names(inputs)
+)]
+validation_args$runtime_policy <- if (isTRUE(options$allow_version_mismatch)) {
+  "compatible"
+} else {
+  "strict"
+}
+validation <- do.call(validate_inputs, validation_args)
 if (!isTRUE(validation$ok)) {
   message("invalid_input: ", paste(validation$errors, collapse = "; "))
   quit(save = "no", status = 2L)
@@ -133,7 +150,8 @@ result <- if (identical(options$method, "exact")) {
     seed = options$seed,
     max_proposals = options$max_proposals,
     max_seconds = options$max_seconds,
-    direction = options$direction
+    direction = "all",
+    prefix_sizes = options$prefix_sizes
   )
 }
 if (identical(result$status, "invalid_input")) {
@@ -173,6 +191,11 @@ rendered <- render_report(
     },
     analysis_target = if (isTRUE(options$layer_a)) "layer_a" else
       if (is.null(options$analysis_spec)) "fixture_layer_a" else "authoritative_backend",
+    runtime_policy = if (isTRUE(options$allow_version_mismatch)) {
+      "compatible"
+    } else {
+      "strict"
+    },
     method = options$method,
     max_evaluations = if (is.infinite(options$max_evaluations)) {
       "Inf"
@@ -183,7 +206,12 @@ rendered <- render_report(
     max_proposals = options$max_proposals,
     max_seconds = options$max_seconds,
     seed = options$seed,
-    direction = options$direction,
+    direction = "all",
+    prefix_sizes = if (is.null(options$prefix_sizes)) {
+      c(1L, 2L, 4L, 8L, 16L, 32L, 64L, 128L)
+    } else {
+      options$prefix_sizes
+    },
     package_version = as.character(utils::packageVersion("AnnotationBreakpoint"))
   )
 )
@@ -191,12 +219,34 @@ rendered <- render_report(
 scalar_or_na <- function(value) {
   if (is.null(value) || !length(value) || is.na(value[[1L]])) "NA" else value[[1L]]
 }
+original <- result$original_fit
+runtime <- if (!is.null(original) && !is.null(original$runtime)) {
+  original$runtime
+} else {
+  list(
+    policy = result$backend_identity$runtime_policy,
+    expected_r_version = result$backend_identity$expected_r_version,
+    observed_r_version = result$backend_identity$observed_r_version,
+    expected_backend_version = result$backend_identity$expected_backend_version,
+    observed_backend_version = result$backend_identity$backend_version
+  )
+}
 cat(
   "status=", result$status,
   " best_verified_cost=", scalar_or_na(result$best_verified_cost),
   " exact_minimum_cost=", scalar_or_na(result$exact_minimum_cost),
   " verification_ok=", verification$ok,
   " method=", options$method,
+  " original_fit_status=", scalar_or_na(if (is.null(original)) NULL else original$status),
+  " failure_reason=", scalar_or_na(if (is.null(original)) NULL else original$failure_reason),
+  " error=", scalar_or_na(if (is.null(original)) NULL else original$error),
+  " warnings=", scalar_or_na(if (is.null(original) || !length(original$warnings)) NULL else
+    paste(original$warnings, collapse = " | ")),
+  " runtime_policy=", scalar_or_na(runtime$policy),
+  " expected_r=", scalar_or_na(runtime$expected_r_version),
+  " observed_r=", scalar_or_na(runtime$observed_r_version),
+  " expected_edgeR=", scalar_or_na(runtime$expected_backend_version),
+  " observed_edgeR=", scalar_or_na(runtime$observed_backend_version),
   " output_dir=", rendered$output_dir,
   "\n",
   sep = ""

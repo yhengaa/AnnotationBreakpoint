@@ -1,8 +1,10 @@
 ^\.git$
 ^\.gitignore$
+^\.github$
 ^\.Rbuildignore$
 ^\.Rproj\.user$
 ^\.Rhistory$
 ^\.RData$
 ^reports$
 ^ab-output$
+^SHA256SUMS$

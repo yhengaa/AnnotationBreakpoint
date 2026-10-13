@@ -1,0 +1,4 @@
+gene_id	F_C1_A	F_C1_B	F_C1_in	F_C2_A	F_C2_B	F_K1_A	F_K1_B	F_K1_in	F_K2_A	F_K2_B
+G_target	10	5	0	10	5	25	5	0	25	5
+G_ref1	45	47	50	45	47	37	47	50	37	47
+G_ref2	45	48	50	45	48	38	48	50	38	48

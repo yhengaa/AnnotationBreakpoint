@@ -104,7 +104,11 @@
       )
     )
   } else {
-    list(claim = claim_payload, analysis_spec = data$analysis_spec)
+    list(
+      claim = claim_payload,
+      analysis_spec = data$analysis_spec,
+      runtime_policy = .ab_normalize_runtime_policy(data$runtime_policy)
+    )
   }
   hashes <- c(
     component_hashes,
@@ -438,7 +442,10 @@
         margin = result$original_fit$margin,
         claim_holds = result$original_fit$claim_holds,
         overturn = result$original_fit$overturn,
-        error = result$original_fit$error
+        error = result$original_fit$error,
+        failure_reason = result$original_fit$failure_reason,
+        warnings = result$original_fit$warnings,
+        runtime = result$original_fit$runtime
       ),
       candidates = candidates,
       best_verified_cost = result$best_verified_cost,
@@ -451,6 +458,13 @@
       method = result$method,
       seed = result$seed,
       direction = result$direction,
+      proxy_prefix_contract = if (is.null(result$proxy_prefix)) NULL else list(
+        route = result$proxy_prefix$route,
+        registered_prefix_sizes = result$proxy_prefix$registered_prefix_sizes,
+        available_prefix_sizes = result$proxy_prefix$available_prefix_sizes,
+        ranking_frozen_before_fits = result$proxy_prefix$ranking_frozen_before_fits,
+        diagnostics_included = result$proxy_prefix$diagnostics_included
+      ),
       fit_accounting = result$fit_accounting,
       search_path = result$search_path,
       termination_reason = result$termination_reason

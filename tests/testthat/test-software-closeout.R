@@ -34,6 +34,109 @@ test_that("proxy_prefix reproduces the frozen fixed-prefix nomination order", {
   )
 })
 
+test_that("custom prefix sizes preserve the fixed ranking and are recorded", {
+  validation <- closeout_validation()
+  default_plan <- getFromNamespace(
+    ".ab_proxy_prefix_plan", "AnnotationBreakpoint"
+  )(validation$data)
+  custom_plan <- getFromNamespace(
+    ".ab_proxy_prefix_plan", "AnnotationBreakpoint"
+  )(validation$data, prefix_sizes = c(1, 2, 3))
+
+  expect_identical(
+    default_plan$registered_prefix_sizes,
+    c(1L, 2L, 4L, 8L, 16L, 32L, 64L, 128L)
+  )
+  expect_identical(custom_plan$registered_prefix_sizes, c(1L, 2L, 3L))
+  expect_identical(custom_plan$available_prefix_sizes, c(1L, 2L))
+  expect_identical(custom_plan$ranking, default_plan$ranking)
+  expect_identical(custom_plan$assignments$k1, default_plan$assignments$k1)
+  expect_identical(custom_plan$assignments$k2, default_plan$assignments$k2)
+
+  result <- search_breakpoint(
+    validation, max_fits = 9L, seed = 1L,
+    prefix_sizes = c(1, 2, 3),
+    fit_fun = function(x, assignment) 2
+  )
+  expect_identical(result$status, "no_counterexample_found")
+  expect_identical(
+    result$proxy_prefix$registered_prefix_sizes,
+    c(1L, 2L, 3L)
+  )
+  expect_identical(result$proxy_prefix$available_prefix_sizes, c(1L, 2L))
+  expect_identical(result$proxy_prefix$ranking, default_plan$ranking)
+  expect_identical(result$candidates$prefix_size, c(1L, 2L))
+})
+
+test_that("unavailable custom prefix tails remain bound into result identity", {
+  validation <- closeout_validation()
+  no_hit <- function(x, assignment) 2
+  first <- search_breakpoint(
+    validation, max_fits = 9L, seed = 1L,
+    prefix_sizes = c(1, 2, 3), fit_fun = no_hit
+  )
+  second <- search_breakpoint(
+    validation, max_fits = 9L, seed = 1L,
+    prefix_sizes = c(1, 2, 4), fit_fun = no_hit
+  )
+
+  expect_identical(first$proxy_prefix$available_prefix_sizes, c(1L, 2L))
+  expect_identical(second$proxy_prefix$available_prefix_sizes, c(1L, 2L))
+  expect_identical(
+    first$candidates$assignment_id,
+    second$candidates$assignment_id
+  )
+  expect_identical(first$attempted_fit_count, second$attempted_fit_count)
+
+  result_identity <- getFromNamespace(
+    ".ab_result_identity", "AnnotationBreakpoint"
+  )
+  first_id <- result_identity(first)
+  second_id <- result_identity(second)
+  expect_false(identical(first_id, second_id))
+  expect_true(first$independent_verification$ok)
+  expect_true(second$independent_verification$ok)
+  expect_identical(first$independent_verification$result_identity, first_id)
+  expect_identical(second$independent_verification$result_identity, second_id)
+})
+
+test_that("invalid prefix sizes and non-proxy use are rejected", {
+  validation <- closeout_validation()
+  invalid_sizes <- list(
+    numeric(),
+    c(1, 1),
+    c(2, 1),
+    c(1, 1.5),
+    c(0, 1),
+    c(1, NA_real_)
+  )
+  for (sizes in invalid_sizes) {
+    result <- search_breakpoint(
+      validation, max_fits = 9L, seed = 1L,
+      prefix_sizes = sizes,
+      fit_fun = function(x, assignment) 2
+    )
+    expect_identical(result$status, "invalid_input", info = paste(sizes))
+    expect_match(
+      paste(result$errors, collapse = " | "),
+      "strictly increasing list of unique positive integers",
+      fixed = TRUE
+    )
+  }
+
+  legacy <- search_breakpoint(
+    validation, method = "greedy", max_fits = 4L, seed = 1L,
+    max_proposals = 4L, prefix_sizes = c(1, 2),
+    fit_fun = function(x, assignment) 2
+  )
+  expect_identical(legacy$status, "invalid_input")
+  expect_match(
+    paste(legacy$errors, collapse = " | "),
+    "supported only by method = 'proxy_prefix'",
+    fixed = TRUE
+  )
+})
+
 test_that("default proxy_prefix returns only an independently replayed upper bound", {
   validation <- closeout_validation()
   fit_by_cost <- function(x, assignment) {
